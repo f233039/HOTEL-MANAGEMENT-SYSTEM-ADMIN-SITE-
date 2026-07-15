@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Management System | 23F-3039, 23F-3036</title>
+    <meta name="description" content="Hotel Management System - Database Phase 2 CRUD Implementation">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ── Sidebar ── -->
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">🏨</div>
+                <div>
+                    <h1>HotelHub</h1>
+                    <span>Management System</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-label">Main</div>
+                <div class="nav-item active" data-section="dashboard" onclick="showSection('dashboard')">
+                    <span class="nav-icon"><i class="fas fa-th-large"></i></span> Dashboard
+                </div>
+
+                <div class="nav-label">Entities</div>
+                <div class="nav-item" data-section="hotels" onclick="showSection('hotels')">
+                    <span class="nav-icon"><i class="fas fa-hotel"></i></span> Hotels
+                </div>
+                <div class="nav-item" data-section="rooms" onclick="showSection('rooms')">
+                    <span class="nav-icon"><i class="fas fa-door-open"></i></span> Rooms
+                </div>
+                <div class="nav-item" data-section="staff" onclick="showSection('staff')">
+                    <span class="nav-icon"><i class="fas fa-users-cog"></i></span> Staff
+                </div>
+                <div class="nav-item" data-section="guests" onclick="showSection('guests')">
+                    <span class="nav-icon"><i class="fas fa-user-friends"></i></span> Guests
+                </div>
+
+                <div class="nav-label">Operations</div>
+                <div class="nav-item" data-section="reservations" onclick="showSection('reservations')">
+                    <span class="nav-icon"><i class="fas fa-calendar-check"></i></span> Reservations
+                </div>
+                <div class="nav-item" data-section="services" onclick="showSection('services')">
+                    <span class="nav-icon"><i class="fas fa-concierge-bell"></i></span> Services
+                </div>
+                <div class="nav-item" data-section="payments" onclick="showSection('payments')">
+                    <span class="nav-icon"><i class="fas fa-credit-card"></i></span> Payments
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-footer-info">Phase 2 — DB Project</div>
+                <div class="sidebar-footer-version">v1.0 • 23F-3039, 23F-3036</div>
+            </div>
+        </aside>
+
+        <!-- ── Main ── -->
+        <main class="main-content">
+            <header class="topbar">
+                <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="topbar-title">
+                    <h2 id="pageTitle">Dashboard</h2>
+                    <p id="pageSubtitle">Overview of your hotel management system</p>
+                </div>
+                <div class="topbar-actions">
+                    <span style="font-size:12px;color:var(--text-muted)">23F-3039 | 23F-3036</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- ══════ DASHBOARD ══════ -->
+                <div class="page-section active" id="sec-dashboard">
+                    <div class="stats-grid" id="statsGrid"></div>
+                    <div class="section-header"><h3>Quick Actions</h3></div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+                        <div class="stat-card" style="cursor:pointer" onclick="showSection('hotels')">
+                            <div style="font-size:28px;margin-bottom:10px">🏨</div>
+                            <div style="font-weight:700;margin-bottom:4px">Manage Hotels</div>
+                            <div style="font-size:12px;color:var(--text-muted)">Create, view, edit & delete hotels</div>
+                        </div>
+                        <div class="stat-card" style="cursor:pointer" onclick="showSection('rooms')">
+                            <div style="font-size:28px;margin-bottom:10px">🚪</div>
+                            <div style="font-weight:700;margin-bottom:4px">Manage Rooms</div>
+                            <div style="font-size:12px;color:var(--text-muted)">Suite, Deluxe & Executive rooms</div>
+                        </div>
+                        <div class="stat-card" style="cursor:pointer" onclick="showSection('reservations')">
+                            <div style="font-size:28px;margin-bottom:10px">📅</div>
+                            <div style="font-weight:700;margin-bottom:4px">Reservations</div>
+                            <div style="font-size:12px;color:var(--text-muted)">Manage bookings & check-ins</div>
+                        </div>
+                        <div class="stat-card" style="cursor:pointer" onclick="showSection('payments')">
+                            <div style="font-size:28px;margin-bottom:10px">💳</div>
+                            <div style="font-weight:700;margin-bottom:4px">Payments</div>
+                            <div style="font-size:12px;color:var(--text-muted)">Track revenue & payments</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════ HOTELS ══════ -->
+                <div class="page-section" id="sec-hotels">
+                    <div class="section-header">
+                        <h3>Hotels</h3>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchHotels" placeholder="Search hotels..." oninput="loadHotels()">
+                            </div>
+                            <button class="btn btn-primary" onclick="openModal('hotel')"><i class="fas fa-plus"></i> Add Hotel</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table"><thead><tr>
+                            <th>ID</th><th>Name</th><th>Location</th><th>Rating</th><th>Contact</th><th>Actions</th>
+                        </tr></thead><tbody id="hotelsTable"></tbody></table>
+                    </div>
+                </div>
+
+                <!-- ══════ ROOMS ══════ -->
+                <div class="page-section" id="sec-rooms">
+                    <div class="section-header">
+                        <h3>Rooms</h3>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchRooms" placeholder="Search rooms..." oninput="loadRooms()">
+                            </div>
+                            <button class="btn btn-primary" onclick="openModal('room')"><i class="fas fa-plus"></i> Add Room</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table"><thead><tr>
+                            <th>ID</th><th>Room No</th><th>Hotel</th><th>Type</th><th>Floor</th><th>Price</th><th>Status</th><th>Details</th><th>Actions</th>
+                        </tr></thead><tbody id="roomsTable"></tbody></table>
+                    </div>
+                </div>
+
+                <!-- ══════ STAFF ══════ -->
+                <div class="page-section" id="sec-staff">
+                    <div class="section-header">
+                        <h3>Staff</h3>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchStaff" placeholder="Search staff..." oninput="loadStaff()">
+                            </div>
+                            <button class="btn btn-primary" onclick="openModal('staff')"><i class="fas fa-plus"></i> Add Staff</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table"><thead><tr>
+                            <th>ID</th><th>Name</th><th>Hotel</th><th>Role</th><th>Salary</th><th>Details</th><th>Actions</th>
+                        </tr></thead><tbody id="staffTable"></tbody></table>
+                    </div>
+                </div>
+
+                <!-- ══════ GUESTS ══════ -->
+                <div class="page-section" id="sec-guests">
+                    <div class="section-header">
+                        <h3>Guests</h3>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchGuests" placeholder="Search guests..." oninput="loadGuests()">
+                            </div>
+                            <button class="btn btn-primary" onclick="openModal('guest')"><i class="fas fa-plus"></i> Add Guest</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table"><thead><tr>
+                            <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Type</th><th>Actions</th>
+                        </tr></thead><tbody id="guestsTable"></tbody></table>
+                    </div>
+                </div>
+
+                <!-- ══════ RESERVATIONS ══════ -->
+                <div class="page-section" id="sec-reservations">
+                    <div class="section-header">
+                        <h3>Reservations</h3>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchReservations" placeholder="Search reservations..." oninput="loadReservations()">
+                            </div>
+                            <button class="btn btn-primary" onclick="openModal('reservation')"><i class="fas fa-plus"></i> New Reservation</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table"><thead><tr>
+                            <th>ID</th><th>Guest</th><th>Room</th><th>Hotel</th><th>Check In</th><th>Check Out</th><th>Amount</th><th>Status</th><th>Actions</th>
+                        </tr></thead><tbody id="reservationsTable"></tbody></table>
+                    </div>
+                </div>
+
+                <!-- ══════ SERVICES ══════ -->
+                <div class="page-section" id="sec-services">
+                    <div class="section-header">
+                        <h3>Services</h3>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchServices" placeholder="Search services..." oninput="loadServices()">
+                            </div>
+                            <button class="btn btn-primary" onclick="openModal('service')"><i class="fas fa-plus"></i> Add Service</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table"><thead><tr>
+                            <th>ID</th><th>Service Name</th><th>Cost (PKR)</th><th>Actions</th>
+                        </tr></thead><tbody id="servicesTable"></tbody></table>
+                    </div>
+                </div>
+
+                <!-- ══════ PAYMENTS ══════ -->
+                <div class="page-section" id="sec-payments">
+                    <div class="section-header">
+                        <h3>Payments</h3>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchPayments" placeholder="Search payments..." oninput="loadPayments()">
+                            </div>
+                            <button class="btn btn-primary" onclick="openModal('payment')"><i class="fas fa-plus"></i> Add Payment</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table"><thead><tr>
+                            <th>ID</th><th>Guest</th><th>Reservation</th><th>Method</th><th>Amount</th><th>Status</th><th>Actions</th>
+                        </tr></thead><tbody id="paymentsTable"></tbody></table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ══════ MODAL ══════ -->
+    <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Record</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" id="modalSaveBtn" onclick="saveRecord()"><i class="fas fa-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="forms.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+        // Close sidebar on nav item click (mobile)
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    document.getElementById('sidebar').classList.remove('open');
+                    document.getElementById('sidebarOverlay').classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
